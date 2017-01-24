@@ -22,6 +22,8 @@ namespace SimpleBulkConsole
         {
             try
             {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
                 var task = RunSample();
                 task.Wait();
             }
@@ -90,7 +92,7 @@ namespace SimpleBulkConsole
             Console.WriteLine("Dynamically typed accounts created");
 
             // get the id of the first account created in the first batch
-            var id = results2[0][0].Id;
+            var id = results2[0].Items[0].Id;
             dtAccountsBatch = new SObjectList<SObject>
             {
                 new SObject
@@ -108,8 +110,8 @@ namespace SimpleBulkConsole
 
             // create an Id list for the original strongly typed accounts created
             var idBatch = new SObjectList<SObject>();
-            idBatch.AddRange(results1[0].Select(result => new SObject {{"Id", result.Id}}));
-
+            idBatch.AddRange(results1[0].Items.Select(result => new SObject { { "Id", result.Id } }));
+            
             // delete all the strongly typed accounts
             var results4 = await client.RunJobAndPollAsync("Account", BulkConstants.OperationType.Delete,
                     new List<SObjectList<SObject>>{idBatch});
